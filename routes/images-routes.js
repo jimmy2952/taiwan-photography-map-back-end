@@ -2,6 +2,7 @@ const express = require("express");
 const { check } = require("express-validator");
 
 const imagesController = require("../controllers/images-controller");
+const fileUpload = require("../middleware/file-upload")
 
 const router = express.Router();
 
@@ -10,6 +11,7 @@ router.get("/:cityName/:scapeName", imagesController.getImagesByScape);
 
 router.post(
   "/",
+  fileUpload.single("image")
   [
     check("imageTitle").not().isEmpty(),
     check("imageCategory").not().isEmpty(),

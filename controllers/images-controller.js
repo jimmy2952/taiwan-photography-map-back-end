@@ -62,6 +62,7 @@ const addImage = async (req, res, next) => {
     creator,
   } = req.body;
   const newImage = new Image({
+    image: req.file.path,
     imageTitle,
     imageDescription,
     imageCategory,
