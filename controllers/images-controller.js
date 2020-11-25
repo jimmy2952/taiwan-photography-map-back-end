@@ -1,50 +1,9 @@
 const { validationResult } = require("express-validator");
+const mongoose = require("mongoose")
 
 const HttpError = require("../models/http-error");
 const Image = require("../models/image");
-
-let DUMMY_IMAGES = [
-  {
-    id: "p1",
-    imageTitle: "九份不厭亭1",
-    imageDescription: "新北最適合拍照的地方。",
-    imageCategory: "風景",
-    imageCityLocation: "新北市",
-    imageDistrictLocation: "瑞芳區",
-    imageScapeName: "九份",
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    imageTitle: "九份不厭亭2",
-    imageDescription: "新北最適合拍照的地方。",
-    imageCategory: "風景",
-    imageCityLocation: "新北市",
-    imageDistrictLocation: "瑞芳區",
-    imageScapeName: "九份",
-    creator: "u1",
-  },
-  {
-    id: "p3",
-    imageTitle: "林家花園",
-    imageDescription: "新北第二適合拍照的地方。",
-    imageCategory: "風景",
-    imageCityLocation: "新北市",
-    imageDistrictLocation: "板橋區",
-    imageScapeName: "林家花園",
-    creator: "u2",
-  },
-  {
-    id: "p4",
-    imageTitle: "金針花海",
-    imageDescription: "花蓮秘境。",
-    imageCategory: "風景",
-    imageCityLocation: "花蓮縣",
-    imageDistrictLocation: "玉里鎮",
-    imageScapeName: "赤柯山",
-    creator: "u3",
-  },
-];
+const User = require("../models/user")
 
 const getScapesByCity = async (req, res, next) => {
   const cityName = req.params.cityName;
@@ -111,14 +70,38 @@ const addImage = async (req, res, next) => {
     imageScapeName,
     creator,
   });
+
+  let user;
+
   try {
-    await newImage.save();
+    user = await User.findById(creator)
   } catch (err) {
     const error = new HttpError("新增照片失敗，請稍後再試。", 500);
-    return next();
+    return next(error);
   }
 
-  res.status(201).json({ image: newImage });
+  if (!user) {
+    const error = new HttpError("查無此帳號。", 500);
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await newImage.save({ session: sess });
+    user.images.push(newImage);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    console.log(err);
+    const error = new HttpError(
+      "新增照片失敗，請稍後再試。",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(201).json({ image: newImage.toObject({ getters: true }) });
 };
 
 exports.getScapesByCity = getScapesByCity;
