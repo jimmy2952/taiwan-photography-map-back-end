@@ -9,7 +9,7 @@ const placeSchema = new Schema({
   imageCityLocation: { type: String, required: true },
   imageDistrictLocation: { type: String, required: true },
   imageScapeName: { type: String, required: true },
-  creator: { type: String, required: true },
+  creator: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
 });
 
-module.exports = mongoose.model("Place", placeSchema) 
+module.exports = mongoose.model("Image", placeSchema) 

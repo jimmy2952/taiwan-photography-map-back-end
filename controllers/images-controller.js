@@ -1,7 +1,7 @@
-const { v4: uuid } = require("uuid");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
+const Image = require("../models/image");
 
 let DUMMY_IMAGES = [
   {
@@ -12,7 +12,7 @@ let DUMMY_IMAGES = [
     imageCityLocation: "新北市",
     imageDistrictLocation: "瑞芳區",
     imageScapeName: "九份",
-    creator: "u1"
+    creator: "u1",
   },
   {
     id: "p2",
@@ -22,7 +22,7 @@ let DUMMY_IMAGES = [
     imageCityLocation: "新北市",
     imageDistrictLocation: "瑞芳區",
     imageScapeName: "九份",
-    creator: "u1"
+    creator: "u1",
   },
   {
     id: "p3",
@@ -32,7 +32,7 @@ let DUMMY_IMAGES = [
     imageCityLocation: "新北市",
     imageDistrictLocation: "板橋區",
     imageScapeName: "林家花園",
-    creator: "u2"
+    creator: "u2",
   },
   {
     id: "p4",
@@ -42,56 +42,85 @@ let DUMMY_IMAGES = [
     imageCityLocation: "花蓮縣",
     imageDistrictLocation: "玉里鎮",
     imageScapeName: "赤柯山",
-    creator: "u3"
+    creator: "u3",
   },
 ];
 
-const getScapesByCity = (req, res, next) => {
-  const cityName = req.params.cityName
+const getScapesByCity = async (req, res, next) => {
+  const cityName = req.params.cityName;
 
-  const city = DUMMY_IMAGES.filter((image) => {
-    return image.imageCityLocation === cityName
-  })
-
-  if (!city || city.length === 0) {
-    return next(
-      new HttpError("該城市目前還沒有照片哦！", 404)
-    );
+  let scapes;
+  try {
+    scapes = await Image.find({ imageCityLocation: cityName });
+  } catch (err) {
+    const error = new HttpError("伺服器錯誤，請稍後再試。", 500);
+    return next(error);
   }
-  res.json({ city });
-}
 
-const getImagesByScape = (req, res, next) => {
-  const cityName = req.params.cityName
-  const scapeName = req.params.scapeName
+  if (!scapes || scapes.length === 0) {
+    return next(new HttpError("該城市目前還沒有照片哦！", 404));
+  }
+  res.json({
+    scapes: scapes.map((scape) => scape.toObject({ getters: true })),
+  });
+};
 
-  res.json({ cityName, scapeName })
-}
+const getImagesByScape = async (req, res, next) => {
+  const cityName = req.params.cityName;
+  const scapeName = req.params.scapeName;
 
-const addImage = (req, res, next) => {
+  let images;
+  try {
+    images = await Image.find({
+      imageCityLocation: cityName,
+      imageScapeName: scapeName,
+    });
+  } catch (err) {
+    const error = new HttpError("伺服器錯誤，請稍後再試。", 500);
+    return next(error);
+  }
+
+  if (!images || images.length === 0) {
+    return next(new HttpError("該城市目前還沒有照片哦！", 404));
+  }
+  res.json({
+    images: images.map((image) => image.toObject({ getters: true })),
+  });
+};
+
+const addImage = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return next(
-      new HttpError("請檢查必填欄位", 422)
-    );
+    return next(new HttpError("請檢查必填欄位", 422));
   }
-  const { imageTitle, imageDescription, imageCategory, imageCityLocation, imageDistrictLocation, imageScapeName } = req.body
-  const newImage = {
-    id: uuid(),
+  const {
     imageTitle,
     imageDescription,
     imageCategory,
     imageCityLocation,
     imageDistrictLocation,
-    imageScapeName
+    imageScapeName,
+    creator,
+  } = req.body;
+  const newImage = new Image({
+    imageTitle,
+    imageDescription,
+    imageCategory,
+    imageCityLocation,
+    imageDistrictLocation,
+    imageScapeName,
+    creator,
+  });
+  try {
+    await newImage.save();
+  } catch (err) {
+    const error = new HttpError("新增照片失敗，請稍後再試。", 500);
+    return next();
   }
-  DUMMY_IMAGES.push(newImage)
+
   res.status(201).json({ image: newImage });
-}
+};
 
-
-
-
-exports.getScapesByCity = getScapesByCity
-exports.getImagesByScape = getImagesByScape
-exports.addImage = addImage
+exports.getScapesByCity = getScapesByCity;
+exports.getImagesByScape = getImagesByScape;
+exports.addImage = addImage;

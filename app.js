@@ -37,15 +37,13 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occurred!" })
 })
 
-// mongoose
-//   .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gshdu.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   })
-//   .then(() => {
-//     console.log("connected!")
-//     app.listen(5000);
-//   })
-//   .catch((err) => console.log(err));
-
-app.listen(5000)
+mongoose
+  .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gshdu.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("connected!")
+    app.listen(5000);
+  })
+  .catch((err) => console.log(err));
