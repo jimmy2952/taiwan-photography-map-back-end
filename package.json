@@ -1,0 +1,31 @@
+{
+  "name": "taiwan-photography-map-back-end",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jimmy2952/taiwan-photography-map-back-end.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jimmy2952/taiwan-photography-map-back-end/issues"
+  },
+  "homepage": "https://github.com/jimmy2952/taiwan-photography-map-back-end#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-validator": "^6.7.0",
+    "mongoose": "^5.10.15",
+    "mongoose-unique-validator": "^2.0.3",
+    "uuid": "^8.3.1"
+  }
+}
