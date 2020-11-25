@@ -11,7 +11,7 @@ router.get("/:cityName/:scapeName", imagesController.getImagesByScape);
 
 router.post(
   "/",
-  fileUpload.single("image")
+  fileUpload.single("image"),
   [
     check("imageTitle").not().isEmpty(),
     check("imageCategory").not().isEmpty(),
