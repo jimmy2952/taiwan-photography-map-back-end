@@ -1,28 +1,45 @@
 const { validationResult } = require("express-validator");
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const HttpError = require("../models/http-error");
 const Image = require("../models/image");
-const User = require("../models/user")
+const User = require("../models/user");
 
 const getAllImage = async (req, res, next) => {
   try {
-    images = await Image.find({}, 'image imageScapeName')
+    images = await Image.find({}, "image imageScapeName");
   } catch (err) {
     const error = new HttpError("伺服器錯誤，請稍後再試。", 500);
     return next(error);
   }
   res.json({
-    images: images.map((image) => image.toObject({ getters: true }))
-  })
-}
+    images: images.map((image) => image.toObject({ getters: true })),
+  });
+};
 
 const getScapesByCity = async (req, res, next) => {
   const cityName = req.params.cityName;
 
   let scapes;
   try {
-    scapes = await Image.find({ imageCityLocation: cityName });
+    scapes = await Image.find(
+      { imageCityLocation: cityName },
+      "image imageScapeName"
+    );
+    scapeInCity = [];
+    scapes.forEach((image, index) => {
+      if (index == 0) {
+        scapeInCity.push(image)
+      } else {
+        for (const value of scapeInCity) {
+          if (scapeInCity.find(element => element.imageScapeName === image.imageScapeName)) {
+            break
+          } else {
+            scapeInCity.push(image)
+          }
+        }
+      }
+    });
   } catch (err) {
     const error = new HttpError("伺服器錯誤，請稍後再試。", 500);
     return next(error);
@@ -32,7 +49,7 @@ const getScapesByCity = async (req, res, next) => {
     return next(new HttpError("該城市目前還沒有照片哦！", 404));
   }
   res.json({
-    scapes: scapes.map((scape) => scape.toObject({ getters: true })),
+    scapes: scapeInCity.map((scape) => scape.toObject({ getters: true })),
   });
 };
 
@@ -87,7 +104,7 @@ const addImage = async (req, res, next) => {
   let user;
 
   try {
-    user = await User.findById(req.userData.userId)
+    user = await User.findById(req.userData.userId);
   } catch (err) {
     const error = new HttpError("新增照片失敗，請稍後再試。", 500);
     return next(error);
@@ -107,10 +124,7 @@ const addImage = async (req, res, next) => {
     await sess.commitTransaction();
   } catch (err) {
     console.log(err);
-    const error = new HttpError(
-      "新增照片失敗，請稍後再試。",
-      500
-    );
+    const error = new HttpError("新增照片失敗，請稍後再試。", 500);
     return next(error);
   }
 
