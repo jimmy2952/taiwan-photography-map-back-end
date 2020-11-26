@@ -3,11 +3,14 @@ const { check } = require("express-validator");
 
 const imagesController = require("../controllers/images-controller");
 const fileUpload = require("../middleware/file-upload")
+const checkAuth = require("../middleware/check-auth")
 
 const router = express.Router();
 
 router.get("/:cityName", imagesController.getScapesByCity);
 router.get("/:cityName/:scapeName", imagesController.getImagesByScape);
+
+router.use(checkAuth)
 
 router.post(
   "/",
