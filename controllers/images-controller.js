@@ -5,6 +5,18 @@ const HttpError = require("../models/http-error");
 const Image = require("../models/image");
 const User = require("../models/user")
 
+const getAllImage = async (req, res, next) => {
+  try {
+    images = await Image.find({}, 'image imageScapeName')
+  } catch (err) {
+    const error = new HttpError("伺服器錯誤，請稍後再試。", 500);
+    return next(error);
+  }
+  res.json({
+    images: images.map((image) => image.toObject({ getters: true }))
+  })
+}
+
 const getScapesByCity = async (req, res, next) => {
   const cityName = req.params.cityName;
 
@@ -105,6 +117,7 @@ const addImage = async (req, res, next) => {
   res.status(201).json({ image: newImage.toObject({ getters: true }) });
 };
 
+exports.getAllImage = getAllImage;
 exports.getScapesByCity = getScapesByCity;
 exports.getImagesByScape = getImagesByScape;
 exports.addImage = addImage;
