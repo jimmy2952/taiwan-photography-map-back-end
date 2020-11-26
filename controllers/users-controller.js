@@ -96,7 +96,7 @@ const login = async (req, res, next) => {
   }
 
   if (!existingUser) {
-    const error = new HttpError("請先註冊。", 401);
+    const error = new HttpError("請先註冊。", 403);
     return next(error);
   }
 
@@ -109,7 +109,7 @@ const login = async (req, res, next) => {
   }
 
   if (!isValidPassword) {
-    const error = new HttpError("密碼錯誤。", 401)
+    const error = new HttpError("密碼錯誤。", 403)
     return next(error)
   }
 

@@ -69,13 +69,13 @@ const addImage = async (req, res, next) => {
     imageCityLocation,
     imageDistrictLocation,
     imageScapeName,
-    creator,
+    creator: req.userData.userId,
   });
 
   let user;
 
   try {
-    user = await User.findById(creator)
+    user = await User.findById(req.userData.userId)
   } catch (err) {
     const error = new HttpError("新增照片失敗，請稍後再試。", 500);
     return next(error);
