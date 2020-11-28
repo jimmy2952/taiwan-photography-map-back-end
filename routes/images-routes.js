@@ -8,6 +8,7 @@ const checkAuth = require("../middleware/check-auth")
 const router = express.Router();
 
 router.get("/", imagesController.getAllImage);
+router.get("/get-image/:imageId", imagesController.getSingleImage)
 router.get("/:cityName", imagesController.getScapesByCity);
 router.get("/:cityName/:scapeName", imagesController.getImagesByScape);
 

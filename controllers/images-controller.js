@@ -12,10 +12,22 @@ const getAllImage = async (req, res, next) => {
     const error = new HttpError("伺服器錯誤，請稍後再試。", 500);
     return next(error);
   }
-  res.json({
+  res.send({
     images: images.map((image) => image.toObject({ getters: true })),
   });
 };
+
+const getSingleImage = async (req, res, next) => {
+  const imageId = req.params.imageId;
+  try {
+    image = await Image.findById(imageId);
+  } catch (err) {
+    const error = new HttpError("伺服器錯誤，請稍後再試。", 500);
+    return next(error);
+  }
+  res.set('Content-Type', 'image/png');
+  res.send(image.image)
+}
 
 const getScapesByCity = async (req, res, next) => {
   const cityName = req.params.cityName;
@@ -88,10 +100,9 @@ const addImage = async (req, res, next) => {
     imageCityLocation,
     imageDistrictLocation,
     imageScapeName,
-    creator,
   } = req.body;
   const newImage = new Image({
-    image: req.file.path,
+    image: req.file.buffer,
     imageTitle,
     imageDescription,
     imageCategory,
@@ -127,11 +138,13 @@ const addImage = async (req, res, next) => {
     const error = new HttpError("新增照片失敗，請稍後再試。", 500);
     return next(error);
   }
+  console.log(newImage)
 
   res.status(201).json({ image: newImage.toObject({ getters: true }) });
 };
 
 exports.getAllImage = getAllImage;
+exports.getSingleImage = getSingleImage;
 exports.getScapesByCity = getScapesByCity;
 exports.getImagesByScape = getImagesByScape;
 exports.addImage = addImage;

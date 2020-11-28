@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const placeSchema = new Schema({
-  image: { type: String, required: true },
+  image: { type: Buffer, required: true },
   imageTitle: { type: String, required: true },
   imageDescription: { type: String, required: false },
   imageCategory: { type: String, required: true },
