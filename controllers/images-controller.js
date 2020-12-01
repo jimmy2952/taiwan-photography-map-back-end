@@ -6,14 +6,30 @@ const Image = require("../models/image");
 const User = require("../models/user");
 
 const getAllImage = async (req, res, next) => {
+  let images;
+  let imagesWithScapes = [];
   try {
-    images = await Image.find({}, "image imageScapeName");
+    images = await Image.find({}, "imageCityLocation imageScapeName");
+    imagesWithScapes = [];
+    images.forEach((image, index) => {
+      if (index == 0) {
+        imagesWithScapes.push(image)
+      } else {
+        for (const value of imagesWithScapes) {
+          if (imagesWithScapes.find(element => element.imageScapeName === image.imageScapeName)) {
+            break
+          } else {
+            imagesWithScapes.push(image)
+          }
+        }
+      }
+    });
   } catch (err) {
     const error = new HttpError("伺服器錯誤，請稍後再試。", 500);
     return next(error);
   }
   res.send({
-    images: images.map((image) => image.toObject({ getters: true })),
+    images: imagesWithScapes.map((image) => image.toObject({ getters: true })),
   });
 };
 
