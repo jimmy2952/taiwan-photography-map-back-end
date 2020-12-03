@@ -6,9 +6,11 @@ const Image = require("../models/image");
 const User = require("../models/user");
 
 const getAllImage = async (req, res, next) => {
+  let skip;
   let images;
   let imagesWithScapes = [];
   try {
+    skip = req.query.skip && /^\d+$/.test(req.query.skip) ? Number(req.query.skip) : 0
     images = await Image.find({}, "imageCityLocation imageScapeName");
     imagesWithScapes = [];
     images.forEach((image, index) => {
@@ -29,7 +31,7 @@ const getAllImage = async (req, res, next) => {
     return next(error);
   }
   res.send({
-    images: imagesWithScapes.map((image) => image.toObject({ getters: true })),
+    images: imagesWithScapes.slice(skip, skip+12).map((image) => image.toObject({ getters: true })),
   });
 };
 
